@@ -10,7 +10,7 @@ A collection of reusable AI coding agents, portable skills, and coding standards
 ## Installation
 
 ```bash
-git clone https://github.com/<your-username>/ai-tools.git
+git clone https://github.com/elieldepaula/ai-tools.git
 cd ai-tools
 ```
 

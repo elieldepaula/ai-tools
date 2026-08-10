@@ -57,13 +57,91 @@ cp -R dist/.claude/.   <your-project>/
 cp -R dist/.cursor/.   <your-project>/
 ```
 
+## Agents
+
+### Roles
+
+| Role | Profile | Responsibility |
+| ---- | ------- | ------------- |
+| Architect | Read-only | Designs solutions, module/package/application structure, and technical decisions |
+| Developer | Full | Implements features, fixes bugs, and refactors code |
+| QA | Bash only | Defines test strategies and plans, reviews coverage — identifies problems and hands them back to the developer, never fixes code |
+| Reviewer | Read-only | Reviews code for security, performance, patterns, and standards |
+
+### Available agents
+
+#### Magento 2
+
+| Agent | Profile | Description |
+| ----- | ------- | ----------- |
+| `magento-architect` | read-only | Systems architect for Magento 2: scalable solutions, module structure, design patterns, technical decisions |
+| `magento-developer` | full | Implements features, fixes bugs, and writes code following Magento ecosystem standards |
+| `magento-qa` | qa | Test strategies, plans, and coverage reviews for Magento 2 |
+| `magento-reviewer` | readonly | Reviews code for Magento 2 practices, security, performance, and PSR standards |
+
+#### Vanilla PHP
+
+| Agent | Profile | Description |
+| ----- | ------- | ----------- |
+| `php-architect` | read-only | Systems architect for pure PHP: package structure, design patterns, technical decisions |
+| `php-developer` | full | Implements features and fixes bugs following PHP community standards (PSR) |
+| `php-qa` | qa | Test strategies and coverage reviews for pure PHP |
+| `php-reviewer` | readonly | Reviews code for PHP practices, security, performance, and PSR standards |
+
+#### Laravel
+
+| Agent | Profile | Description |
+| ----- | ------- | ----------- |
+| `laravel-architect` | read-only | Systems architect for Laravel: application structure, design patterns, technical decisions |
+| `laravel-developer` | full | Implements features and fixes bugs following Laravel ecosystem standards |
+| `laravel-qa` | qa | Test strategies and coverage reviews for Laravel |
+| `laravel-reviewer` | readonly | Reviews code for Laravel practices, security, performance, and PSR standards |
+
+### Using the agents
+
+Agents run as subagents in each tool:
+
+| Tool | How to invoke | Example |
+| ---- | ------------- | ------- |
+| opencode | `@` mention in the message | `@magento-reviewer review the changes in @src/app/code/Foo` |
+| Claude Code | mention the agent by name; Claude delegates via the Agent tool | `Use the laravel-reviewer subagent to review the auth module.` |
+| Cursor | `@` mention in Agent chat | `@php-qa write a test plan for the new checkout flow` |
+
+Example review pipeline:
+
+```
+@php-architect design the module structure for the reporting feature
+@php-developer implement the architect's plan
+@php-qa build a test plan and run the test suite
+@php-reviewer review the pull request against the coding standards
+```
+
+## Skills
+
+| Skill | What it does | When to use |
+| ----- | ------------- | ----------- |
+| `caveman` | Ultra-compressed communication mode; cuts token usage ~75% while keeping full technical accuracy | "be brief", token efficiency, dense summaries |
+| `grilling` | Relentless interview of a plan/decision using a design tree explored in rounds | Stress-testing a plan, decision, or idea |
+| `grill-me` | Shortcut that activates the `grilling` interview | Only when you explicitly ask to be grilled |
+| `planning-with-files` | Manus-style file-based planning (`task_plan.md`, `findings.md`, `progress.md`) with session recovery | Complex multi-step tasks (5+ tool calls) |
+
+### Using the skills
+
+Skills are loaded automatically by the agent when relevant, or can be invoked manually:
+
+| Tool | Invocation | Example |
+| ---- | ---------- | ------- |
+| opencode | `/` command (or `$skill` inline in newer versions) | `/caveman summarize the findings` |
+| Claude Code | `/` command | `/planning-with-files plan the migration` |
+| Cursor | `/` command in Agent chat | `/grilling grill my design` |
+
 ## Project structure
 
 ```
 ai-tools/
 ├── agents/               # canonical agents (source of truth)
 ├── skills/               # portable skills (SKILL.md format)
-├── coding-standards/    # coding standards referenced by agents (as .coding-standards in dist/)
+├── coding-standards/       # coding standards referenced by agents (as .coding-standards in dist/)
 ├── scripts/
 │   └── sync-agents.sh    # multi-tool generation script
 └── dist/                 # generated output per tool

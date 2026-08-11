@@ -6,6 +6,7 @@ cd "$ROOT"
 
 AGENTS_SRC="$ROOT/agents"
 SKILLS_SRC="$ROOT/skills"
+COMMANDS_SRC="$ROOT/commands"
 STANDARDS_SRC="$ROOT/coding-standards"
 DIST="$ROOT/dist"
 mkdir -p "$DIST"
@@ -40,6 +41,21 @@ copy_skills() {
   done
 }
 
+copy_commands() {
+  local dest="$1"
+  for f in "$COMMANDS_SRC"/*.md; do
+    local name fm_name
+    name="$(basename "$f" .md)"
+    fm_name="$(sed -n 's/^name: //p' "$f" | head -1)"
+    if [ "$fm_name" != "$name" ]; then
+      echo "warning: $f has name '$fm_name', expected '$name'"
+    fi
+    mkdir -p "$dest/skills/$name"
+    cp "$f" "$dest/skills/$name/SKILL.md"
+    echo "generated: command $name"
+  done
+}
+
 detect_profile() {
   local f="$1"
   local has_tools bash_true write_false edit_false
@@ -69,6 +85,7 @@ gen_claude() {
   local dest="$DIST/.claude"
   mkdir -p "$dest/agents" "$dest/skills"
   copy_skills "$dest/skills"
+  copy_commands "$dest"
   for f in "$AGENTS_SRC"/*.md; do
     local base
     base="$(basename "$f" .md)"
@@ -94,6 +111,7 @@ gen_cursor() {
   local dest="$DIST/.cursor"
   mkdir -p "$dest/agents" "$dest/skills"
   copy_skills "$dest/skills"
+  copy_commands "$dest"
   for f in "$AGENTS_SRC"/*.md; do
     local base
     base="$(basename "$f" .md)"
@@ -119,6 +137,7 @@ gen_opencode() {
   local dest="$DIST/.opencode"
   mkdir -p "$dest/agent" "$dest/skills"
   copy_skills "$dest/skills"
+  copy_commands "$dest"
   for f in "$AGENTS_SRC"/*.md; do
     local base
     base="$(basename "$f" .md)"

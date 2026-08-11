@@ -4,8 +4,9 @@ A collection of reusable AI coding agents, portable skills, and coding standards
 
 - 12 specialized agents (architect, developer, QA, reviewer) for **Magento 2**, **vanilla PHP**, and **Laravel**
 - 4 portable skills (Agent Skills / `SKILL.md` format): `caveman`, `grilling`, `grill-me`, `planning-with-files`
+- 4 slash commands (`/design`, `/implement`, `/test`, `/review`) distributed as skills across all tools
 - 12 reusable coding standards in `coding-standards/`
-- One script generates the correct agent/skill layout for each tool
+- One script generates the correct agent/skill/command layout for each tool
 
 ## Installation
 
@@ -31,7 +32,7 @@ The script writes everything to `dist/`:
 dist/
 ├── .claude/
 │   ├── agents/        # Claude Code agents (tools: Read, Grep, Glob[, Bash])
-│   └── skills/
+│   └── skills/        # skills + commands (/design, /implement, ...)
 ├── .cursor/
 │   ├── agents/        # Cursor agents (readonly: true|false)
 │   └── skills/
@@ -135,12 +136,26 @@ Skills are loaded automatically by the agent when relevant, or can be invoked ma
 | Claude Code | `/` command | `/planning-with-files plan the migration` |
 | Cursor | `/` command in Agent chat | `/grilling grill my design` |
 
+## Commands
+
+Commands are task shortcuts distributed as skills, so they work the same way in every tool (`/command`). Each one detects the codebase stack and delegates to the matching subagent:
+
+| Command | Delegates to | Example |
+| ------- | ------------ | ------- |
+| `/design` | `*-architect` | `/design the order checkout module` |
+| `/implement` | `*-developer` | `/implement the password reset flow` |
+| `/test` | `*-qa` | `/test the payment integration` |
+| `/review` | `*-reviewer` | `/review the changes in @src/app` |
+
+Author new commands as `commands/<name>.md` with `name` and `description` frontmatter; the sync script turns each one into a `skills/<name>/SKILL.md` for every tool.
+
 ## Project structure
 
 ```
 ai-tools/
 ├── agents/               # canonical agents (source of truth)
 ├── skills/               # portable skills (SKILL.md format)
+├── commands/             # slash commands, distributed as skills
 ├── coding-standards/       # coding standards referenced by agents (as .coding-standards in dist/)
 ├── scripts/
 │   └── sync-agents.sh    # multi-tool generation script

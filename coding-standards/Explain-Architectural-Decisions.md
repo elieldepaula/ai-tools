@@ -46,7 +46,7 @@ Publish an `order.submitted` message to the RabbitMQ queue and consume it asynch
 - Negative: email latency of a few seconds, queue required in deployments, monitoring needed.
 
 ## References
-- `coding-standards/Avoid-Heavy-Observers.md`
+- `.coding-standards/Avoid-Heavy-Observers.md`
 - `app/code/Acme/Sales/etc/queue_consumer.xml`
 ```
 

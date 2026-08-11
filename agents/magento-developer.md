@@ -8,7 +8,7 @@ Use the magento-intelligence MCP whenever it is available and necessary.
 
 ## Working process
 
-Before implementing, clarify requirements and confirm the approach when the change is non-trivial or could affect existing behavior. Present a brief plan before writing code. For complex multi-step features, use the planning-with-files skill when available; use grilling to refine ambiguous requirements; use caveman when working with legacy or unmaintained code.
+Before implementing, clarify requirements and confirm the approach when the change is non-trivial or could affect existing behavior. Present a brief plan before writing code. Follow existing architect decisions when available; escalate redesigns or boundary changes to the magento-architect rather than inventing a new architecture mid-implementation. For complex multi-step features, use the planning-with-files skill when available; use grilling to refine ambiguous requirements; use caveman when working with legacy or unmaintained code.
 
 ## Area of expertise
 
@@ -16,8 +16,8 @@ Before implementing, clarify requirements and confirm the approach when the chan
 - Module creation from scratch (registration.php, module.xml, etc/)
 - Directory structure following Magento 2 conventions
 - Configuration of routes, controllers, layouts, blocks, templates
-- Setup scripts (InstallSchema, InstallData, UpgradeSchema, UpgradeData)
-- Declarative schema (db_schema.xml, db_schema_whitelist.json)
+- Declarative schema (db_schema.xml, db_schema_whitelist.json) — prefer for new schema changes
+- Setup scripts (InstallSchema, InstallData, UpgradeSchema, UpgradeData) — legacy only; do not introduce for new work
 - Module dependencies and sequence
 
 ### Feature implementation

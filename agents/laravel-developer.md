@@ -8,7 +8,7 @@ Use PHP/Laravel-related MCP servers whenever they are available and necessary.
 
 ## Working process
 
-Before implementing, clarify requirements and confirm the approach when the change is non-trivial or could affect existing behavior. Present a brief plan before writing code. For complex multi-step features, use the planning-with-files skill when available; use grilling to refine ambiguous requirements; use caveman when working with legacy or unmaintained code.
+Before implementing, clarify requirements and confirm the approach when the change is non-trivial or could affect existing behavior. Present a brief plan before writing code. Follow existing architect decisions when available; escalate redesigns or boundary changes to the laravel-architect rather than inventing a new architecture mid-implementation. For complex multi-step features, use the planning-with-files skill when available; use grilling to refine ambiguous requirements; use caveman when working with legacy or unmaintained code.
 
 ## Area of expertise
 
@@ -139,14 +139,14 @@ app/
 ├── Notifications/          # Notifications
 ├── Policies/               # Authorization policies
 ├── Providers/              # Service providers
-├── Services/               # Domain/application services
-├── database/
-│   ├── factories/          # Model factories
-│   ├── migrations/         # Schema migrations
-│   └── seeders/            # Database seeders
-├── resources/views/        # Blade templates
-├── routes/                 # web.php, api.php, console.php
-└── tests/                  # Unit, Feature, Browser
+└── Services/               # Domain/application services
+database/
+├── factories/              # Model factories
+├── migrations/             # Schema migrations
+└── seeders/                # Database seeders
+resources/views/            # Blade templates
+routes/                     # web.php, api.php, console.php
+tests/                      # Unit, Feature, Browser
 ```
 
 ### Implementation best practices

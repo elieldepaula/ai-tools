@@ -50,6 +50,8 @@ Agent profiles are translated per tool:
 | QA       | `tools: {bash: true, write: false, edit: false}`  | `tools: Read, Grep, Glob, Bash`              | `readonly: false` |
 | Full     | (no `tools` block)                            | (no `tools` field)                           | `readonly: false` |
 
+Cursor cannot express “bash without write,” so QA agents map to `readonly: false`. The agent body still requires never fixing or editing application code; follow that instruction even when write tools are available.
+
 Then copy the generated folder(s) into your target project:
 
 ```bash
@@ -66,7 +68,7 @@ cp -R dist/.cursor/.   <your-project>/
 | ---- | ------- | ------------- |
 | Architect | Read-only | Designs solutions, module/package/application structure, and technical decisions |
 | Developer | Full | Implements features, fixes bugs, and refactors code |
-| QA | Bash only | Defines test strategies and plans, reviews coverage — identifies problems and hands them back to the developer, never fixes code |
+| QA | Bash only | Defines test strategies and plans, runs/analyzes tests, reviews coverage — identifies problems and hands them back to the developer, never fixes code; general standards/security review belongs to the Reviewer |
 | Reviewer | Read-only | Reviews code for security, performance, patterns, and standards |
 
 ### Available agents
@@ -77,7 +79,7 @@ cp -R dist/.cursor/.   <your-project>/
 | ----- | ------- | ----------- |
 | `magento-architect` | read-only | Systems architect for Magento 2: scalable solutions, module structure, design patterns, technical decisions |
 | `magento-developer` | full | Implements features, fixes bugs, and writes code following Magento ecosystem standards |
-| `magento-qa` | qa | Test strategies, plans, and coverage reviews for Magento 2 |
+| `magento-qa` | qa | Test strategies, plans, running/analyzing tests, and coverage reviews for Magento 2 |
 | `magento-reviewer` | readonly | Reviews code for Magento 2 practices, security, performance, and PSR standards |
 
 #### Vanilla PHP
@@ -86,7 +88,7 @@ cp -R dist/.cursor/.   <your-project>/
 | ----- | ------- | ----------- |
 | `php-architect` | read-only | Systems architect for pure PHP: package structure, design patterns, technical decisions |
 | `php-developer` | full | Implements features and fixes bugs following PHP community standards (PSR) |
-| `php-qa` | qa | Test strategies and coverage reviews for pure PHP |
+| `php-qa` | qa | Test strategies, plans, running/analyzing tests, and coverage reviews for pure PHP |
 | `php-reviewer` | readonly | Reviews code for PHP practices, security, performance, and PSR standards |
 
 #### Laravel
@@ -95,7 +97,7 @@ cp -R dist/.cursor/.   <your-project>/
 | ----- | ------- | ----------- |
 | `laravel-architect` | read-only | Systems architect for Laravel: application structure, design patterns, technical decisions |
 | `laravel-developer` | full | Implements features and fixes bugs following Laravel ecosystem standards |
-| `laravel-qa` | qa | Test strategies and coverage reviews for Laravel |
+| `laravel-qa` | qa | Test strategies, plans, running/analyzing tests, and coverage reviews for Laravel |
 | `laravel-reviewer` | readonly | Reviews code for Laravel practices, security, performance, and PSR standards |
 
 ### Using the agents

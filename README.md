@@ -2,11 +2,11 @@
 
 A collection of reusable AI coding agents, portable skills, and coding standards for development workflows. Supports **opencode**, **Claude Code**, and **Cursor** through a single sync script.
 
-- 12 specialized agents (architect, developer, QA, reviewer) for **Magento 2**, **vanilla PHP**, and **Laravel**
+- 20 specialized agents (architect, developer, QA, reviewer) for **Magento 2**, **vanilla PHP**, **Laravel**, **React**, and **Vue.js**
 - 4 portable skills (Agent Skills / `SKILL.md` format): `caveman`, `grilling`, `grill-me`, `planning-with-files`
 - 4 slash commands (`/design`, `/implement`, `/test`, `/review`) distributed as skills across all tools
-- 12 reusable coding standards in `coding-standards/`
-- One script generates the correct agent/skill/command layout for each tool
+- 14 reusable coding standards in `coding-standards/`
+- One script generates the correct agent/skill/command layout for each tool into `dist/` (local/generated — not versioned; run when setting up a target project)
 
 ## Installation
 
@@ -26,7 +26,7 @@ scripts/sync-agents.sh claude     # only Claude Code
 scripts/sync-agents.sh cursor     # only Cursor
 ```
 
-The script writes everything to `dist/`:
+The script writes everything to `dist/` (gitignored). Generate it when you install the stack into a specific project — do not commit `dist/`:
 
 ```
 dist/
@@ -55,10 +55,10 @@ Cursor cannot express “bash without write,” so QA agents map to `readonly: f
 Then copy the generated folder(s) into your target project:
 
 ```bash
-cp -R dist/.opencode/. <your-project>/
-cp -R dist/.claude/.   <your-project>/
-cp -R dist/.cursor/.   <your-project>/
+cp -R dist/.opencode dist/.claude dist/.cursor dist/.coding-standards <your-project>/
 ```
+
+Keep `.coding-standards/` at the project root — the agents resolve the standards from there.
 
 ## Agents
 
@@ -100,6 +100,24 @@ cp -R dist/.cursor/.   <your-project>/
 | `laravel-qa` | qa | Test strategies, plans, running/analyzing tests, and coverage reviews for Laravel |
 | `laravel-reviewer` | readonly | Reviews code for Laravel practices, security, performance, and PSR standards |
 
+#### React
+
+| Agent | Profile | Description |
+| ----- | ------- | ----------- |
+| `react-architect` | read-only | Systems architect for React: component architecture, state management, build tooling, and technical decisions |
+| `react-developer` | full | Implements features and fixes bugs following React ecosystem standards |
+| `react-qa` | qa | Test strategies, plans, running/analyzing tests, and coverage reviews for React |
+| `react-reviewer` | readonly | Reviews code for React practices, security, performance, and standards |
+
+#### Vue.js
+
+| Agent | Profile | Description |
+| ----- | ------- | ----------- |
+| `vue-architect` | read-only | Systems architect for Vue.js: component architecture, Pinia state, build tooling, and technical decisions |
+| `vue-developer` | full | Implements features and fixes bugs following Vue ecosystem standards |
+| `vue-qa` | qa | Test strategies, plans, running/analyzing tests, and coverage reviews for Vue.js |
+| `vue-reviewer` | readonly | Reviews code for Vue.js practices, security, performance, and standards |
+
 ### Using the agents
 
 Agents run as subagents in each tool:
@@ -117,6 +135,15 @@ Example review pipeline:
 @php-developer implement the architect's plan
 @php-qa build a test plan and run the test suite
 @php-reviewer review the pull request against the coding standards
+```
+
+Front-end example (React):
+
+```
+@react-architect design the state management and data-fetching architecture for the dashboard
+@react-developer implement the architect's plan
+@react-qa build a component test plan and run the test suite
+@react-reviewer review the pull request against the coding standards
 ```
 
 ## Skills
@@ -158,10 +185,10 @@ ai-tools/
 ├── agents/               # canonical agents (source of truth)
 ├── skills/               # portable skills (SKILL.md format)
 ├── commands/             # slash commands, distributed as skills
-├── coding-standards/       # coding standards referenced by agents (as .coding-standards in dist/)
+├── coding-standards/     # coding standards referenced by agents (as .coding-standards in dist/)
 ├── scripts/
 │   └── sync-agents.sh    # multi-tool generation script
-└── dist/                 # generated output per tool
+└── dist/                 # generated output per tool (gitignored; create when installing into a project)
 ```
 
 ## Credits

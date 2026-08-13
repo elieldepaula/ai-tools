@@ -43,7 +43,7 @@ The generator infers each agent's tool profile by regex over the `tools:` frontm
 - `description:` and `name:` are parsed with `sed -n 's/^description: //p'` / `s/^name: //p` in the generator. They must be **single-line** values. Folded `description: >` multi-line styles (as used in `skills/caveman/SKILL.md`) are fine only for skills (copied wholesale), not for agents or commands.
 - Agents: `description`, `mode: subagent`, optional `tools:` (see above).
 - Commands: `name:` must equal the filename or the script warns; `description:` required.
-- Agent bodies reference internal skills by name (`planning-with-files`, `grilling`, `caveman`) and assume they ship with the generated stack.
+- Agent bodies reference internal skills by name (`spec-driven`, `planning-with-files`, `grilling`, `caveman`) and assume they ship with the generated stack.
 
 ## Workflow
 

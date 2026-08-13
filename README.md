@@ -3,7 +3,7 @@
 A collection of reusable AI coding agents, portable skills, and coding standards for development workflows. Supports **opencode**, **Claude Code**, and **Cursor** through a single sync script.
 
 - 20 specialized agents (architect, developer, QA, reviewer) for **Magento 2**, **vanilla PHP**, **Laravel**, **React**, and **Vue.js**
-- 4 portable skills (Agent Skills / `SKILL.md` format): `caveman`, `grilling`, `grill-me`, `planning-with-files`
+- 5 portable skills (Agent Skills / `SKILL.md` format): `caveman`, `grilling`, `grill-me`, `planning-with-files`, `spec-driven`
 - 4 slash commands (`/design`, `/implement`, `/test`, `/review`) distributed as skills across all tools
 - 14 reusable coding standards in `coding-standards/`
 - One script generates the correct agent/skill/command layout for each tool into `dist/` (local/generated — not versioned; run when setting up a target project)
@@ -154,6 +154,7 @@ Front-end example (React):
 | `grilling` | Relentless interview of a plan/decision using a design tree explored in rounds | Stress-testing a plan, decision, or idea |
 | `grill-me` | Shortcut that activates the `grilling` interview | Only when you explicitly ask to be grilled |
 | `planning-with-files` | Manus-style file-based planning (`task_plan.md`, `findings.md`, `progress.md`) with session recovery | Complex multi-step tasks (5+ tool calls) |
+| `spec-driven` | Spec-first workflow (`specs/<feature-id>/`) with size tiers, templates, and validation against acceptance criteria; pairs with `grilling` + `planning-with-files` | Starting features/projects, decomposing ambiguous requirements, validating work against a spec |
 
 ### Using the skills
 

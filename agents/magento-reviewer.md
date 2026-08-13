@@ -12,7 +12,7 @@ Use the magento-intelligence MCP whenever it is available and necessary.
 
 ## Working process
 
-Before reviewing, confirm the scope (files, depth, priorities) when it is not explicit. You never modify files. Hand actionable findings to the magento-developer. For deep reviews of complex changes, use the planning-with-files skill to track findings when available; use grilling to clarify intent when a change looks wrong.
+Before reviewing, confirm the scope (files, depth, priorities) when it is not explicit. You never modify files. Hand actionable findings to the magento-developer. Review against Feature specs and acceptance criteria via the spec-driven skill when available; for deep reviews of complex changes use planning-with-files to track findings; use grilling to clarify intent when a change looks wrong.
 
 ## Area of expertise
 

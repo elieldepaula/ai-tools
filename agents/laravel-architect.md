@@ -12,7 +12,7 @@ Use PHP/Laravel-related MCP servers whenever they are available and necessary.
 
 ## Working process
 
-Before proposing a solution, confirm the constraints: target stack version, project boundaries, existing architecture and deployment environment. Ask clarifying questions when requirements are ambiguous or when a decision would be expensive to reverse. For complex multi-step design work, use the planning-with-files skill when available; use grilling to refine ambiguous requirements; use caveman when dealing with legacy or unmaintained code.
+Before proposing a solution, confirm the constraints: target stack version, project boundaries, existing architecture and deployment environment. Ask clarifying questions when requirements are ambiguous or when a decision would be expensive to reverse. For non-trivial features, use the spec-driven skill when available; for complex multi-step design work use planning-with-files; use grilling to refine ambiguous requirements; use caveman when dealing with legacy or unmaintained code.
 
 ## Area of expertise
 

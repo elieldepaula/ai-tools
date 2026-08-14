@@ -16,11 +16,11 @@ When this skill applies:
 1. **Classify size** using [Size tiers](#size-tiers). Skip the skill if trivial.
 2. **Inspect the repo** for existing specs, architecture, tests, and related code.
 3. **Resolve ambiguity** — facts from the repo; business decisions via the `grilling` skill. Do not invent business rules.
-4. **Write or update** files under `specs/<feature-id>/` (use [templates/](templates/)).
+4. **Write or update** files under `specs/<feature-id>/` (use [templates/](templates/)). When Medium or Large, delegate the artifacts to the `*-architect` first — see [Multi-agent delegation](#multi-agent-delegation).
 5. **Capture** any explicit requirement from chat into the spec before implementing.
 6. **Decompose** into Tasks when the Feature cannot be one isolated change.
-7. **Implement one Task at a time**, loading context in order (below).
-8. **Validate** against acceptance criteria and the Feature spec; emit a [completion report](#completion-report).
+7. **Implement one Task at a time**, loading context in order (below). When Large, delegate Tasks to the `*-developer`.
+8. **Validate** against acceptance criteria and the Feature spec; emit a [completion report](#completion-report). When Medium or Large, delegate validation to the `*-qa` and final review to the `*-reviewer`.
 
 ## When to use / skip
 
@@ -39,11 +39,35 @@ When unsure: prefer the skill if misunderstanding the requirement costs more tha
 
 Introduce only the structure the work justifies:
 
-| Size | Artifacts |
-| ---- | --------- |
-| **Small** | Thin `spec.md` + `acceptance.md` + one Task (`tasks/TASK-001-<slug>.md`) |
-| **Medium** | Above + `architecture.md` + full `tasks.md` with dependencies |
-| **Large** | Above + Epic nesting, ADRs, dependency graph, multi-agent parallel Tasks |
+| Size | Artifacts | Delegation |
+| ---- | --------- | ---------- |
+| **Small** | Thin `spec.md` + `acceptance.md` + one Task (`tasks/TASK-001-<slug>.md`) | Inline (main agent) |
+| **Medium** | Above + `architecture.md` + full `tasks.md` with dependencies | `*-architect` writes spec+architecture+Tasks; `*-qa` validates; `*-reviewer` reviews |
+| **Large** | Above + Epic nesting, ADRs, dependency graph, multi-agent parallel Tasks | `*-architect` writes artifacts; `*-developer` per Task (parallel when independent); `*-qa`; `*-reviewer` |
+
+## Multi-agent delegation
+
+Delegate by size tier. A subagent call costs context and latency — only delegate when the tier requires it, never for work you can do inline. The main agent orchestrates; subagents do focused work and return reports.
+
+Select subagents by detected stack prefix + role suffix: Magento 2 → `magento-*`, Laravel → `laravel-*`, Pure PHP → `php-*`, React → `react-*`, Vue.js → `vue-*`; roles → `*-architect`, `*-developer`, `*-qa`, `*-reviewer`.
+
+| Stage | Trigger | Delegate to |
+| ----- | ------- | ----------- |
+| Ambiguity / business rules | Any missing business decision | `grilling` — interview the user, never a subagent |
+| Spec + acceptance + architecture + ADRs + Task decomposition | Size is Medium or Large | `*-architect` |
+| Task implementation | Size is Large (independent Tasks in parallel) | `*-developer` |
+| Test plan + execution evidence | After implementation, before completion report | `*-qa` |
+| Final review | Before Feature DONE | `*-reviewer` |
+
+Imperative rules:
+
+- **Medium or Large**: delegate to the `*-architect` **before** writing anything under `specs/<feature-id>/`. The architect writes the spec, acceptance, architecture, ADRs, and Task decomposition — do not write those yourself.
+- **Large**: hand each Task to a `*-developer`; run independent Tasks in parallel. Do not implement Tasks yourself.
+- **After implementation**: hand the completed work to the `*-qa` for a test plan and execution evidence. QA never fixes code — it reports failures back to the `*-developer` with reproduction steps.
+- **Before Feature DONE**: hand the Feature to the `*-reviewer` for a readonly review against the spec and the project coding standards.
+- **Fallback**: if no matching subagent exists in this session, perform the stage inline — never block the workflow on a missing agent.
+
+Each delegated subagent receives the relevant artifacts (spec, acceptance, architecture, Task) plus a precise scope. Validate each subagent's output against the spec before advancing.
 
 ## Repository layout
 
@@ -134,6 +158,8 @@ Explicit current requirement (must be written into the spec before continuing)
 Use **spec-driven** for what to build and how to know it is done. Use **planning-with-files** to track phases and progress while executing Tasks. Do not treat planning files as a substitute for the Feature specification.
 
 ## Agent responsibilities (per Task)
+
+These are the responsibilities of whoever implements the Task — the main agent (Small/Medium) or the delegated `*-developer` (Large).
 
 1. Read Feature spec, relevant architecture, and the Task.
 2. Inspect codebase and conventions; stay in scope.

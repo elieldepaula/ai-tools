@@ -105,14 +105,24 @@ Recommended PM hierarchy: Epic → Feature → Tasks. Do not create an Epic per 
 
 ## Multi-agent roles (this stack)
 
-| Role | Typical agent | Responsibility |
-| ---- | ------------- | -------------- |
-| Spec / architecture | `*-architect` | Spec, architecture, ADRs, Task decomposition |
-| Implementation | `*-developer` | One Task at a time within scope |
-| Tests / validation | `*-qa` | Test plan, execution evidence; do not silently fix production code |
-| Review | `*-reviewer` | Spec + architecture + code review (readonly) |
+The main agent orchestrates; subagents do focused work and return reports. Select subagents by detected stack prefix (`magento-`, `laravel-`, `php-`, `react-`, `vue-`) + role suffix (`-architect`, `-developer`, `-qa`, `-reviewer`). Delegate by size tier (see `SKILL.md`): Small = inline; Medium+ = architect + qa + reviewer; Large = also parallel developers.
 
-Flow: architect prepares Feature artifacts → developers take independent Tasks in parallel → qa validates → reviewer reviews → spec validation before Feature DONE.
+| Role | Typical agent | Responsibility | Delegation trigger |
+| ---- | ------------- | -------------- | ------------------ |
+| Spec / architecture | `*-architect` | Spec, acceptance, architecture, ADRs, Task decomposition | Size Medium or Large, before writing `specs/<feature-id>/` artifacts |
+| Implementation | `*-developer` | One Task at a time within scope; follow architect decisions | Size Large, one agent per Task, parallel when independent |
+| Tests / validation | `*-qa` | Test plan, execution evidence; never fixes code — reports to the developer | After implementation, before completion report |
+| Review | `*-reviewer` | Spec + architecture + code review (readonly); hands findings to the developer | Before Feature DONE |
+
+Imperative flow:
+
+1. Main agent resolves ambiguity via `grilling` — facts from the repo; business decisions from the user. Never invent business rules.
+2. **Medium or Large**: delegate spec + acceptance + architecture + ADRs + Task decomposition to the `*-architect`. The architect writes everything; the main agent does not.
+3. **Large**: delegate each Task to a `*-developer` (independent Tasks in parallel). The developer returns implementation, tests, and a completion report.
+4. Delegate test plan and execution to the `*-qa`. QA reports failures and bugs to the `*-developer` with reproduction steps — it never fixes code.
+5. Before Feature DONE, delegate a readonly review to the `*-reviewer` against the spec and the project coding standards; route findings back to the `*-developer`.
+
+Fallback: if no matching subagent exists, the main agent performs the stage inline rather than blocking the workflow.
 
 ## Architectural decisions
 

@@ -14,10 +14,10 @@ based on the customer's business unit.
 3. Detect missing business decisions (how units partition, payment/invoice rules, etc.).
 4. Run `grilling` for unresolved business decisions; write answers into the spec.
 5. Create `specs/order-splitting/` (or `specs/COM-102-order-splitting/` if ticket-linked).
-6. Fill `spec.md`, `acceptance.md`, `architecture.md`, `tasks.md` from templates.
+6. **Medium or Large**: delegate to the `*-architect` (e.g. `magento-architect`) to fill `spec.md`, `acceptance.md`, `architecture.md`, and `tasks.md` from templates — do not write the architecture yourself.
 7. Identify Task dependencies; implement only after READY.
-8. Per Task: load context → implement → test → completion report.
-9. Feature DONE only after all Tasks, acceptance, spec, architecture, and review.
+8. Implement per Task, loading context in order (load context → implement → test → completion report). **Large**: delegate each Task to a `*-developer`, independent Tasks in parallel; **Medium**: implement Tasks inline.
+9. **Delegate validation to the `*-qa`** (test plan + execution evidence) and a final readonly review to the `*-reviewer`. Feature DONE only after all Tasks, acceptance, spec, architecture, QA, and review.
 
 ## Ambiguity example
 

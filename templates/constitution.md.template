@@ -1,0 +1,28 @@
+# Constitution
+
+Non-negotiable engineering principles for this project. Every spec, plan, and implementation is
+evaluated against these. Fill in the placeholders; keep it short and reviewable.
+
+## Stack
+
+See `AGENTS.md` in the repository root (human-owned, `## Stack` section).
+
+## Principles
+
+- [ ] List non-negotiable engineering principles (e.g., API-first, database migrations reviewed,
+      feature flags for risky work, accessibility baseline).
+- [ ] Git ownership follows the repo topology declared in `AGENTS.md` (`## Git`): in a
+      `single-repo` the agent commits atomically per task (Conventional Commits); in a
+      `multirepo` the human owns all git operations and the agent never runs git write commands.
+
+## Quality bar
+
+- [ ] Tests required for new behavior; suite must stay green.
+- [ ] Lint/formatting must pass before a task is DONE.
+- [ ] No secrets in code; no debug output committed.
+
+## Delegation rules
+
+- `architect` analyzes; the `sdd` orchestrator writes `specs/` artifacts.
+- `backend-dev` only edits backend code; `react-dev`/`vue-dev` only edit their frontend.
+- `tester` and `reviewer` are read-only; their reports drive fixes, they never edit.

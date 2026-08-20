@@ -1,0 +1,37 @@
+# AGENTS.md
+
+Owned by the project team. Tells the SDD harness and AI agents how to work in this repository.
+Fill in the sections below; the `## Stack` section is mandatory.
+
+## Stack
+
+- Backend: PHP >= 8.2, Laravel, database (PostgreSQL/MySQL/SQLite)
+- Frontend: React (Vite + TypeScript) | VueJs (Vite + TypeScript)
+- Backend tests: Pest | PHPUnit
+- Frontend tests: Vitest + Testing Library | Playwright (e2e)
+
+## Commands
+
+- Backend run: `php artisan serve`
+- Backend tests: `vendor/bin/pest` | `php artisan test`
+- Frontend run: `npm run dev`
+- Frontend tests: `npm run test`
+- Lint: `vendor/bin/pint`, `npm run lint`
+
+## Git
+
+- Repo topology: `single-repo` | `multirepo (human-managed)` (set by `/sdd-init`
+  via `detect_repo_topology.py` and confirmed with the human).
+- `single-repo`: the project root is its own git work tree; the SDD agent drives
+  atomic Conventional Commits per task (`check_commit.py`).
+- `multirepo`: the human owns all git operations. The agent never runs git write
+  commands (add/commit/branch/checkout/push/pull/merge/stash/rebase/reset/tag/worktree);
+  it implements in the working tree, runs the gates, and hands a commit-ready
+  summary to the human. Read-only git (status/diff/log) is always allowed.
+
+## Conventions
+
+- Backend code lives in `app/` (controllers, services, models, migrations, tests).
+- Frontend code lives in `resources/js/` or a dedicated frontend package.
+- One commit per task; tests must pass before a task is marked DONE.
+- API responses follow Laravel resource conventions; errors use JSON structure.

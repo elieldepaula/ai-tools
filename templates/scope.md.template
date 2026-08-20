@@ -1,0 +1,31 @@
+# Project Scope
+
+Human-owned. Provide this file at `docs/scope.md` in the target project before running `/sdd-init`.
+
+## Goal
+
+<What is this project for? A few sentences.>
+
+## Problems to solve
+
+- <list the key problems/needs>
+
+## Boundaries / non-goals
+
+- <what is explicitly out of scope>
+
+## Module map
+
+- <high-level modules/areas, e.g., Auth, Catalog, Orders, Admin>
+
+## Assumptions
+
+- <assumptions about users, infrastructure, constraints>
+
+## Constraints
+
+- <deadlines, budgets, legacy, compliance, tech constraints>
+
+## Stakeholders
+
+- <who cares, who approves>

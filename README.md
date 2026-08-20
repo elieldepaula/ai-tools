@@ -1,210 +1,147 @@
-# AI Tools
+# Harness — SDD for OpenCode (Laravel + React/Vue)
 
-A collection of reusable AI coding agents, portable skills, and coding standards for development workflows. Supports **opencode**, **Claude Code**, and **Cursor** through a single sync script.
+A reusable OpenCode harness that runs an **auto-sized Spec-Driven Development (SDD)** workflow on
+PHP/Laravel backends with React and VueJs frontends. It ships a primary orchestrator agent,
+read-only specialist subagents, one skill per SDD phase, deterministic Python validation scripts,
+and thin slash commands — all plain markdown in OpenCode's native `agents/`, `skills/`, and
+`commands/` format.
 
-- 20 specialized agents (architect, developer, QA, reviewer) for **Magento 2**, **vanilla PHP**, **Laravel**, **React**, and **Vue.js**
-- 5 portable skills (Agent Skills / `SKILL.md` format): `caveman`, `grilling`, `grill-me`, `planning-with-files`, `spec-driven`
-- 4 slash commands (`/design`, `/implement`, `/test`, `/review`) distributed as skills across all tools
-- 14 reusable coding standards in `coding-standards/`
-- One script generates the correct agent/skill/command layout for each tool into `dist/` (local/generated — not versioned; run when setting up a target project)
+## Install
 
-## Installation
+1. Clone this repository.
+2. Run `./install.sh` — it builds the bundle in `dist/.opencode/` and the coding standards in
+   `dist/.coding-standards/` (gitignored).
+3. Copy the generated folders into the root of your target project:
 
-```bash
-git clone https://github.com/elieldepaula/ai-tools.git
-cd ai-tools
-```
+   ```bash
+   cp -R dist/.opencode /path/to/your/project/.opencode
+   cp -R dist/.coding-standards /path/to/your/project/.coding-standards
+   ```
 
-## Usage
+4. In the target project, create the human-owned `docs/` folder (gitignored) and provide
+   `docs/scope.md` describing the initial project scope.
+5. Run `/sdd-init` in OpenCode.
 
-Generate agents and skills for one or more tools:
+Re-run `install.sh` and recopy to update the harness in your projects.
 
-```bash
-scripts/sync-agents.sh            # all tools (opencode, Claude Code, Cursor)
-scripts/sync-agents.sh opencode   # only opencode
-scripts/sync-agents.sh claude     # only Claude Code
-scripts/sync-agents.sh cursor     # only Cursor
-```
-
-The script writes everything to `dist/` (gitignored). Generate it when you install the stack into a specific project — do not commit `dist/`:
+## Project layout (target project)
 
 ```
-dist/
-├── .claude/
-│   ├── agents/        # Claude Code agents (tools: Read, Grep, Glob[, Bash])
-│   └── skills/        # skills + commands (/design, /implement, ...)
-├── .cursor/
-│   ├── agents/        # Cursor agents (readonly: true|false)
-│   └── skills/
-├── .opencode/
-│   ├── agent/         # opencode agents (canonical format)
-│   └── skills/
-└── .coding-standards/
+<project>/
+├── AGENTS.md          # human-owned; "## Stack" section declares the stack
+├── docs/              # gitignored, human-owned
+│   └── scope.md       # initial project scope (required before /sdd-init)
+├── specs/             # committed — source of truth (SDD artifacts)
+│   ├── constitution.md
+│   ├── features.md    # feature backlog derived from the scope
+│   ├── STATE.md       # Decisions (AD-NNN log) + Handoff (resume snapshot)
+│   ├── lessons.json   # machine-owned lessons store (edit via lessons.py)
+│   ├── LESSONS.md     # rendered lessons playbook (auto)
+│   └── <feature>/
+│       ├── spec.md          # EARS ACs + requirement IDs + assumptions
+│       ├── design.md        # Large/Complex only
+│       ├── tasks.md         # Test Coverage Matrix + Gate Commands + index
+│       ├── validation.md    # Verifier report (PASS/FAIL + evidence)
+│       └── tasks/
+│           └── <task-id>-<slug>.md    # one file per task
+├── .coding-standards/  # coding standards (installed bundle)
+└── .opencode/         # installed harness (agents/, skills/, commands/, scripts/)
 ```
 
-Agent profiles are translated per tool:
+`docs/` and `dist/` are gitignored. `specs/` is committed.
 
-| Profile  | opencode / canonical                          | Claude Code                                   | Cursor         |
-| -------- | --------------------------------------------- | --------------------------------------------- | -------------- |
-| Read-only | `tools: {bash: false, write: false, edit: false}` | `tools: Read, Grep, Glob`                    | `readonly: true` |
-| QA       | `tools: {bash: true, write: false, edit: false}`  | `tools: Read, Grep, Glob, Bash`              | `readonly: false` |
-| Full     | (no `tools` block)                            | (no `tools` field)                           | `readonly: false` |
+## Workflow (auto-sized)
 
-Cursor cannot express “bash without write,” so QA agents map to `readonly: false`. The agent body still requires never fixing or editing application code; follow that instruction even when write tools are available.
+Every feature is sized on entry. **Small/Medium** skip design and tasks (implementation lists atomic
+steps inline); **Large/Complex** run the full pipeline.
 
-Then copy the generated folder(s) into your target project:
-
-```bash
-cp -R dist/.opencode dist/.claude dist/.cursor dist/.coding-standards <your-project>/
-```
-
-Keep `.coding-standards/` at the project root — the agents resolve the standards from there.
+1. `/sdd-init` — reads `docs/scope.md`, grills the human (creates `AGENTS.md` with `## Stack` if
+   missing), generates `specs/constitution.md`, `specs/STATE.md`, the lessons store, and
+   `specs/features.md`.
+2. `/sdd-spec <feature>` — architect drafts `spec.md` (EARS ACs, requirement IDs); grilling resolves
+   ambiguity; the closure gate `validate_spec.py` runs before human approval.
+3. `/sdd-plan <feature>` — (Large/Complex) architect designs `design.md`; project-level decisions
+   become `AD-NNN` entries in `specs/STATE.md`.
+4. `/sdd-tasks <feature>` — (Large/Complex) breaks the plan into tasks with a Test Coverage Matrix;
+   the pre-approval gate `validate_tasks.py` runs before human approval.
+5. `/sdd-checklist` and `/sdd-analyze` — quality gates before implementation.
+6. `/sdd-implement <feature>` — delegates tasks to `backend-dev` / `react-dev` / `vue-dev`, runs gate
+   checks, enforces atomic Conventional Commits (`check_commit.py`) in a **single-repo** or hands the
+   human a commit-ready summary in a **multirepo**, marks tasks `DONE`.
+7. `/sdd-verify <feature>` — an independent `verifier` subagent (author != verifier) runs a
+   spec-anchored coverage check + lightweight discrimination sensor, writes `validation.md`.
+8. `/sdd-converge <feature>` — `reviewer` verifies against spec/design/tasks; the completion gate
+   `validate_state.py` runs; grounded failures become lessons via `lessons.py`.
+9. `/sdd-resume <feature>` — resumes a feature by reconciling `specs/STATE.md` Handoff against git
+   and `tasks.md`.
 
 ## Agents
 
-### Roles
+| Agent          | Mode    | Edit | Role                                                     |
+|----------------|---------|------|----------------------------------------------------------|
+| `sdd`          | primary | yes  | Orchestrates the SDD flow; materializes all artifacts    |
+| `architect`    | subagent| no   | Scope/spec/design/task analysis (read-only reports)      |
+| `backend-dev`  | subagent| yes  | PHP/Laravel implementation                               |
+| `react-dev`    | subagent| yes  | React implementation                                     |
+| `vue-dev`      | subagent| yes  | VueJs implementation                                     |
+| `tester`       | subagent| no   | Runs test/lint suites, reports failures                  |
+| `reviewer`     | subagent| no   | Reviews artifacts and code against requirements          |
+| `verifier`     | subagent| no   | Independent verification (author != verifier) + sensor   |
 
-| Role | Profile | Responsibility |
-| ---- | ------- | ------------- |
-| Architect | Read-only | Designs solutions, module/package/application structure, and technical decisions |
-| Developer | Full | Implements features, fixes bugs, and refactors code |
-| QA | Bash only | Defines test strategies and plans, runs/analyzes tests, reviews coverage — identifies problems and hands them back to the developer, never fixes code; general standards/security review belongs to the Reviewer |
-| Reviewer | Read-only | Reviews code for security, performance, patterns, and standards |
-
-### Available agents
-
-#### Magento 2
-
-| Agent | Profile | Description |
-| ----- | ------- | ----------- |
-| `magento-architect` | read-only | Systems architect for Magento 2: scalable solutions, module structure, design patterns, technical decisions |
-| `magento-developer` | full | Implements features, fixes bugs, and writes code following Magento ecosystem standards |
-| `magento-qa` | qa | Test strategies, plans, running/analyzing tests, and coverage reviews for Magento 2 |
-| `magento-reviewer` | readonly | Reviews code for Magento 2 practices, security, performance, and PSR standards |
-
-#### Vanilla PHP
-
-| Agent | Profile | Description |
-| ----- | ------- | ----------- |
-| `php-architect` | read-only | Systems architect for pure PHP: package structure, design patterns, technical decisions |
-| `php-developer` | full | Implements features and fixes bugs following PHP community standards (PSR) |
-| `php-qa` | qa | Test strategies, plans, running/analyzing tests, and coverage reviews for pure PHP |
-| `php-reviewer` | readonly | Reviews code for PHP practices, security, performance, and PSR standards |
-
-#### Laravel
-
-| Agent | Profile | Description |
-| ----- | ------- | ----------- |
-| `laravel-architect` | read-only | Systems architect for Laravel: application structure, design patterns, technical decisions |
-| `laravel-developer` | full | Implements features and fixes bugs following Laravel ecosystem standards |
-| `laravel-qa` | qa | Test strategies, plans, running/analyzing tests, and coverage reviews for Laravel |
-| `laravel-reviewer` | readonly | Reviews code for Laravel practices, security, performance, and PSR standards |
-
-#### React
-
-| Agent | Profile | Description |
-| ----- | ------- | ----------- |
-| `react-architect` | read-only | Systems architect for React: component architecture, state management, build tooling, and technical decisions |
-| `react-developer` | full | Implements features and fixes bugs following React ecosystem standards |
-| `react-qa` | qa | Test strategies, plans, running/analyzing tests, and coverage reviews for React |
-| `react-reviewer` | readonly | Reviews code for React practices, security, performance, and standards |
-
-#### Vue.js
-
-| Agent | Profile | Description |
-| ----- | ------- | ----------- |
-| `vue-architect` | read-only | Systems architect for Vue.js: component architecture, Pinia state, build tooling, and technical decisions |
-| `vue-developer` | full | Implements features and fixes bugs following Vue ecosystem standards |
-| `vue-qa` | qa | Test strategies, plans, running/analyzing tests, and coverage reviews for Vue.js |
-| `vue-reviewer` | readonly | Reviews code for Vue.js practices, security, performance, and standards |
-
-### Using the agents
-
-Agents run as subagents in each tool:
-
-| Tool | How to invoke | Example |
-| ---- | ------------- | ------- |
-| opencode | `@` mention in the message | `@magento-reviewer review the changes in @src/app/code/Foo` |
-| Claude Code | mention the agent by name; Claude delegates via the Agent tool | `Use the laravel-reviewer subagent to review the auth module.` |
-| Cursor | `@` mention in Agent chat | `@php-qa write a test plan for the new checkout flow` |
-
-Example review pipeline:
-
-```
-@php-architect design the module structure for the reporting feature
-@php-developer implement the architect's plan
-@php-qa build a test plan and run the test suite
-@php-reviewer review the pull request against the coding standards
-```
-
-Front-end example (React):
-
-```
-@react-architect design the state management and data-fetching architecture for the dashboard
-@react-developer implement the architect's plan
-@react-qa build a component test plan and run the test suite
-@react-reviewer review the pull request against the coding standards
-```
+Domain boundaries (backend vs frontend) are enforced by agent prompts; `tester`/`reviewer`/`architect`/
+`verifier` are read-only.
 
 ## Skills
 
-| Skill | What it does | When to use |
-| ----- | ------------- | ----------- |
-| `caveman` | Ultra-compressed communication mode; cuts token usage ~75% while keeping full technical accuracy | "be brief", token efficiency, dense summaries |
-| `grilling` | Relentless interview of a plan/decision using a design tree explored in rounds | Stress-testing a plan, decision, or idea |
-| `grill-me` | Shortcut that activates the `grilling` interview | Only when you explicitly ask to be grilled |
-| `planning-with-files` | Manus-style file-based planning (`task_plan.md`, `findings.md`, `progress.md`) with session recovery | Complex multi-step tasks (5+ tool calls) |
-| `spec-driven` | Spec-first workflow (`specs/<feature-id>/`) with size tiers, templates, and validation against acceptance criteria; pairs with `grilling` + `planning-with-files` | Starting features/projects, decomposing ambiguous requirements, validating work against a spec |
+- `grilling` — round-by-round interview to eliminate ambiguity; usable any time.
+- `sdd-context` — assembles project context (AGENTS.md + constitution + STATE.md decisions +
+  confirmed lessons + coding standards + docs/scope.md).
+- `sdd-init` — bootstrap: AGENTS.md (grilling if absent) → scope analysis → constitution + STATE.md +
+  lessons + features.
+- `sdd-spec`, `sdd-plan`, `sdd-tasks` — artifact-producing phases (auto-sized).
+- `sdd-checklist`, `sdd-analyze` — quality gates.
+- `sdd-implement`, `sdd-verify`, `sdd-converge` — implementation, independent verification, and
+  convergence.
+- `sdd-resume` — resume in-progress features.
 
-### Using the skills
+## Scripts (deterministic gates)
 
-Skills are loaded automatically by the agent when relevant, or can be invoked manually:
+Python validation scripts ship in `scripts/` (installed as `.opencode/scripts/`). They make the
+structural gates checkable by code instead of model memory. Pure standard library — no dependencies.
 
-| Tool | Invocation | Example |
-| ---- | ---------- | ------- |
-| opencode | `/` command (or `$skill` inline in newer versions) | `/caveman summarize the findings` |
-| Claude Code | `/` command | `/planning-with-files plan the migration` |
-| Cursor | `/` command in Agent chat | `/grilling grill my design` |
+| Script | Gate | Runs when |
+|--------|------|-----------|
+| `validate_spec.py` | EARS-shaped ACs, required sections, assumption closure, requirement IDs | Before spec approval (`sdd-spec`) |
+| `validate_tasks.py` | Granularity, dependency coherence, Tests/Gate fields, index/detail parity | Before task approval (`sdd-tasks`) |
+| `check_commit.py` | Conventional Commits 1.0.0 | Per atomic commit (`sdd-implement`) |
+| `validate_state.py` | `validation.md` exists, PASS verdict, `file:line` evidence | Feature completion (`sdd-converge`) |
+| `lessons.py` | Lessons bookkeeping: add/list/promote/penalize/prune | After validation; loaded at spec/design |
+
+A non-zero exit means STOP and fix before proceeding.
 
 ## Commands
 
-Commands are task shortcuts distributed as skills, so they work the same way in every tool (`/command`). Each one detects the codebase stack and delegates to the matching subagent:
+`/sdd-init`, `/sdd-install`, `/sdd-context`, `/sdd-spec`, `/sdd-plan`, `/sdd-tasks`, `/sdd-checklist`,
+`/sdd-analyze`, `/sdd-implement`, `/sdd-verify`, `/sdd-converge`, `/sdd-resume`.
 
-| Command | Delegates to | Example |
-| ------- | ------------ | ------- |
-| `/design` | `*-architect` | `/design the order checkout module` |
-| `/implement` | `*-developer` | `/implement the password reset flow` |
-| `/test` | `*-qa` | `/test the payment integration` |
-| `/review` | `*-reviewer` | `/review the changes in @src/app` |
+## Conventions
 
-Author new commands as `commands/<name>.md` with `name` and `description` frontmatter; the sync script turns each one into a `skills/<name>/SKILL.md` for every tool.
+- All agent prompts, skills, and commands are written in English.
+- Default test stack: Pest (Laravel), Vitest + Testing Library (React/Vue), Playwright (e2e).
+  Override in `AGENTS.md` under `## Stack`.
+- Stack is declared by the human in the target project's `AGENTS.md`; the harness never hardcodes it.
+- Git ownership follows the repo topology recorded in `AGENTS.md` under `## Git` (set by `/sdd-init`
+  via `scripts/detect_repo_topology.py` and confirmed with the human): a **single-repo** lets the
+  agent drive atomic Conventional Commits per task; a **multirepo** (the root is not its own git work
+  tree) puts all git operations in the human's hands — the agent only reads git and hands over a
+  commit-ready summary. Read-only git (`status`/`diff`/`log`) is always allowed.
+- Coding standards live in `.coding-standards/` and are referenced by path from agents and skills.
+- Acceptance criteria are written in EARS notation with a SHALL and requirement IDs
+  (`CATEGORY-NNN`).
 
-## Project structure
+## Out of scope
 
-```
-ai-tools/
-├── agents/               # canonical agents (source of truth)
-├── skills/               # portable skills (SKILL.md format)
-├── commands/             # slash commands, distributed as skills
-├── coding-standards/     # coding standards referenced by agents (as .coding-standards in dist/)
-├── scripts/
-│   └── sync-agents.sh    # multi-tool generation script
-└── dist/                 # generated output per tool (gitignored; create when installing into a project)
-```
-
-## Credits
-
-The following skills are derived from original works by their respective authors:
-
-| Skill               | Author                          | Source                                                  |
-| ------------------- | ------------------------------- | ------------------------------------------------------- |
-| `caveman`           | Julius Brussee                  | [JuliusBrussee/caveman](https://github.com/JuliusBrussee/caveman) |
-| `grilling`          | Matt Pocock                     | [mattpocock/skills](https://github.com/mattpocock/skills)        |
-| `grill-me`          | Matt Pocock                     | [mattpocock/skills](https://github.com/mattpocock/skills)        |
-| `planning-with-files` | Ahmad Othman Ammar Adi         | [OthmanAdi/planning-with-files](https://github.com/OthmanAdi/planning-with-files) |
-
-The agents and coding standards in this repository are original to this project.
-
-## License
-
-[MIT](LICENSE)
+- Git is human-managed in multirepo projects (no agent git writes there); in single-repo projects
+  atomic Conventional Commits are enforced per task. Branch/push strategy is always human-owned.
+- No component selection in `install.sh` — the full bundle is built.
+- `docs/` is human territory; the harness only reads `docs/scope.md`.
